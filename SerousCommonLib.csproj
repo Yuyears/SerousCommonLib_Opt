@@ -15,21 +15,47 @@
     <Compile Remove="C:\Users\jruss\.nuget\packages\krafs.publicizer\2.2.1\contentfiles\cs\any\Publicizer\IgnoresAccessChecksToAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
-	  
-	<PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all" />
-	  
-	<Publicize Include="tModLoader" />
+    
+  <PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all" />
+    
+  <Publicize Include="tModLoader" />
 
-	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType`2.CloneNewInstances" />
-	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.InitTemplateInstance" />
-	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.Register" />
-	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.ValidateType" />
-	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftMouseDown" />
-	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftMouseUp" />
-	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftClick" />
-	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawSelf" />
-	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawChildren" />
+  <DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType`2.CloneNewInstances" />
+  <DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.InitTemplateInstance" />
+  <DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.Register" />
+  <DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.ValidateType" />
+  <DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftMouseDown" />
+  <DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftMouseUp" />
+  <DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftClick" />
+  <DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawSelf" />
+  <DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawChildren" />
 
-	  <Publicize Include="FNA" />
+    <Publicize Include="FNA" />
   </ItemGroup>
+  <Target Name="CopyOutputs" AfterTargets="Build">
+    <!-- Destination folder relative to the project directory -->
+    <PropertyGroup>
+      <DestFolder>..\references</DestFolder>
+    </PropertyGroup>
+
+    <!-- Ensure the destination folder exists -->
+    <MakeDir Directories="$(DestFolder)" Condition="!Exists('$(DestFolder)')" />
+
+    <!-- Copy the main DLL -->
+    <Copy SourceFiles="$(TargetDir)$(TargetName).dll"
+          DestinationFolder="$(DestFolder)"
+          SkipUnchangedFiles="false" />
+
+    <!-- Copy the PDB (debug symbols), if it exists -->
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb"
+          DestinationFolder="$(DestFolder)"
+          Condition="Exists('$(TargetDir)$(TargetName).pdb')"
+          SkipUnchangedFiles="false" />
+
+    <!-- Copy the XML documentation file, if it exists -->
+    <Copy SourceFiles="$(TargetDir)$(TargetName).xml"
+          DestinationFolder="$(DestFolder)"
+          Condition="Exists('$(TargetDir)$(TargetName).xml')"
+          SkipUnchangedFiles="false" />
+  </Target>
 </Project>
