@@ -193,6 +193,7 @@ namespace SerousCommonLib.API.Input {
 		/// </summary>
 		public void Focus() {
 			if (IsActive && !HasFocus) {
+				Main.clrInput();
 				Main.blockInput = true;
 				_focused = true;
 				_cursor = _text.Length;

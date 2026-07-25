@@ -69,7 +69,7 @@ namespace SerousCommonLib.API.Input {
 		/// <param name="controller">An optional object used to control the input passed to <paramref name="text"/></param>
 		public static void Handle(StringBuilder text, ITextInputController controller = null) {
 			int cursor = text.Length;
-			Handle(text, ref cursor);
+			Handle(text, ref cursor, controller);
 		}
 		
 		/// <summary>
@@ -134,7 +134,7 @@ namespace SerousCommonLib.API.Input {
 					
 					int i;
 					// Look for the first non-whitespace character
-					for (i = cursor; i >= 0; i--) {
+					for (i = cursor - 1; i >= 0; i--) {
 						if (!char.IsWhiteSpace(currentText[i]))
 							break;
 					}
@@ -209,6 +209,12 @@ namespace SerousCommonLib.API.Input {
 			} else if (canDeleteAKey) {
 				if (cursor > 0)
 					text.Remove(--cursor, 1);
+				goto cleanup;
+			} else if (KeyTyped(Keys.Enter)) {
+				Main.inputTextEnter = true;
+				goto cleanup;
+			} else if (KeyTyped(Keys.Escape) || KeyTyped(Keys.Tab)) {
+				Main.inputTextEscape = true;
 				goto cleanup;
 			}
 

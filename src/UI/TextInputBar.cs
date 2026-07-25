@@ -2,8 +2,11 @@
 using Microsoft.Xna.Framework;
 using ReLogic.Content;
 using ReLogic.Graphics;
+using ReLogic.Localization.IME;
+using ReLogic.OS;
 using SerousCommonLib.API.Input;
 using System;
+using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.UI;
@@ -203,13 +206,36 @@ namespace SerousCommonLib.UI {
 				}
 			}
 
-			spriteBatch.DrawString(font, text, new Vector2(dim.X + Padding, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+			Vector2 origin = new(dim.X + Padding, dim.Y + Padding);
+			bool focused = State.IsActive && State.HasFocus;
+			bool showIme = focused && !State.HideContents;
+			string composition = showIme ? Platform.Get<IImeService>().CompositionString : null;
+			bool hasComposition = !string.IsNullOrEmpty(composition);
+			float cursorOffset = hasText ? font.MeasureString(text[..State.CursorLocation]).X * scale : 0f;
 
-			if (hasText && State.IsActive && State.CursorBlink) {
-				float drawCursor = font.MeasureString(text[..State.CursorLocation]).X * scale;
-				spriteBatch.DrawString(font, "|", new Vector2(dim.X + Padding + drawCursor, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+			if (!hasComposition)
+				spriteBatch.DrawString(font, text, origin, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+			else {
+				float compositionWidth = font.MeasureString(composition).X * scale;
+
+				spriteBatch.DrawString(font, text[..State.CursorLocation], origin, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+				spriteBatch.DrawString(font, composition, origin + new Vector2(cursorOffset, 0f), CompositionColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+				spriteBatch.DrawString(font, text[State.CursorLocation..], origin + new Vector2(cursorOffset + compositionWidth, 0f), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+
+				cursorOffset += compositionWidth;
 			}
+
+			if (hasText && State.CursorBlink)
+				spriteBatch.DrawString(font, "|", origin + new Vector2(cursorOffset, 0f), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+
+			if (showIme)
+				Main.instance.DrawWindowsIMEPanel(origin + new Vector2(cursorOffset + 10f, -6f));
 		}
+
+		/// <summary>
+		/// The color used to draw the in-progress IME composition string.
+		/// </summary>
+		protected virtual Color CompositionColor => new(255, 240, 20);
 
 		/// <summary>
 		/// Executes before the text for this text input actor is drawn
